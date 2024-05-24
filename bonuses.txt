@@ -1,0 +1,57 @@
+BONUS CHALLENGE FORM
+--------------------
+
+For each bonus challenge you have implemented, please replace the sentence "We are not entitled to this bonus."
+with a short description of:
+
+1. How it was implemented in your code
+2. Where it was used (in which class methods).
+3. How you tested that it is working correctly.
+
+--------------------
+
+1. Fully supporting all configuration fields and avoiding the use of magic numbers
+
+    1. Instead of using numbers, we always used the appropriate field: env.config.XXX (XXX = the appropriate field).
+    2. It was used in all constructors of Dealer, Player and Table, and throughout the various methods implemented in these classes (such as parameter for  loops or conditions).
+    3. We changed several config fields in the config.java file, and ensured that our game ran properly, in line with the changes. 
+
+--------------------
+
+2. Terminating all threads (that you created) gracefully and in reverse order to the order they were created in.
+
+    1. We created the threads running through the players list from the first index to the last. In order to gracefully terminate them in reverse order we ran
+    through the player list in reverse order; and for each player we used the terminate() function, followed by thread interupt function and finally the thread
+    join function.
+    2. it was used while creating the threads in the Dealer's run() method, and while terminating the players' threads in the Dealer's terminate() method.
+    3. We used the debugger to see the threads' opening and closing orders and checked the log prints of the threads' start and termination times.
+
+--------------------
+
+3. Handling the config.turnTimeoutMillis value as follows:
+config.turnTimeoutMillis < 0: display nothing.
+config.turnTimeoutMillis = 0: display a timer since the last action (reshuffle or set collected).
+Note: in modes without a countdown timer the dealer must ensure there is always at least one legal set on the table.
+
+    1+2: We have modified the updateTimerDisplay to handle the case when turnTimeoutMillis<0 or =0. In addition, we have modified the run() method 
+    of the dealer to check if it should replace the cards on the table if there is no set, in order for the game to continue (or end if there are no sets 
+    left in the deck).
+    3. We have run the game with different configurations and edge cases and ensured the game responded accordignly. 
+    
+
+--------------------
+
+4. Making sure that the threads do not wake up unless some actual job needs to be done (e.g., a value needs to be
+changed on the display, key input needs to be handled, etc.) and the only threads created by you are:
+1 thread per player + 1 additional thread for non-human players.
+
+    1+2: The delaer: the dealer waits (on a lock - "dealerLock") until a player wakes him up for a set check, or until he needs to update the timer
+    . If he needs to update the timer during TurnTimeoutWarningSeconds he will wake up every 10miliis. Otherwise he will wake up after 900millis
+    (The number 900 millis was chosen based on a web search that stated it is an appropriate sleep time in order to change the timer as accurately as possible). 
+    The players: Firstly, we used a blockingQueue as a way of getting the player's key presses, which ensured that while waiting for a keyPress,
+    the player is on wait(), and is only notified when a key press has been made. Secondly, the player is on wait() on his own monitor while the 
+    dealer checks whether the player's cards form a set of not. The dealer notifies the specific player after checking his set, ensuring no players are 
+    woken up until thier specific set has been checked. Lastly, when recieving a point or a penalty, the player sleeps for the amound of time stated in the config file.
+    Reader-Writer Lock: we implemented a reader-writer lock on Table class; prioritizing the dealers access to the table, allowing him to remove/place cards without
+    player interference. Therefore, when the players/the dealer cant enter the table they are in wait() until notified/ 
+    3. We used a debugger to ensure the threads are sleeping / waiting as expected. 
